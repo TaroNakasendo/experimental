@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        window.onload = function () {
+            navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: true
+            })
+                .then(function (stream) {
+                    document.getElementById('webcam').srcObject = stream;
+                })
+                .catch(function (err) {
+                    document.body.textContent = err;
+                });
+        };
+    </script>
+</head>
+
+<body>
+    <video id="webcam" width="1280" height="960" autoplay controls></video>
+</body>
+
+</html>
