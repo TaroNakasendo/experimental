@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Workers API</title>
+
+    <script type="text/javascript">
+        window.onload = function () {
+            const measure = (threadsNum) => {
+                const primeNum = 2147483647;
+                const chunkSize = Math.ceil(primeNum / threadsNum);
+                const jobs = [];
+                const start = performance.now();
+                for (let i = 0; i < threadsNum; i++) {
+                    const worker = new Worker('worker.js');
+                    const from = Math.max(chunkSize * i, 2);
+                    const to = Math.min(chunkSize * (i + 1), primeNum);
+
+                    const promise = new Promise((resolve, reject) => {
+                        worker.onmessage = (message) => {
+                            resolve(message.data);
+                            worker.terminate();
+                        };
+                    });
+
+                    jobs.push(promise);
+                    worker.postMessage({ num: primeNum, from: from, to: to });
+                }
+                Promise.all(jobs).then((results) => {
+                    const end = performance.now();
+                    const duration = (end - start).toFixed(0);
+                    const t = ("0" + threadsNum).slice(-2);
+                    const resultText = document.createTextNode(t + "threads : " + duration + "ms");
+                    const p = document.querySelector('#result');
+                    p.appendChild(resultText);
+                    p.appendChild(document.createElement('br'));
+                    console.log(threadsNum + ',' + duration);
+                    if (1 < threadsNum) measure(--threadsNum);
+                });
+            }
+            measure(16);
+        };
+    </script>
+</head>
+
+<body>
+    <p>Benchmarking result by number of threads</p>
+    <p id='result'></p>
+</body>
+
+</html>
